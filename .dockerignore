@@ -1,0 +1,7 @@
+__pycache__
+.pytest_cache
+.vscode
+.git
+venv
+cities.db
+errors.txt

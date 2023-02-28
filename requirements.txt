@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pytest
+httpx
+asyncio
+respx
+pytest-asyncio
+beautifulsoup4
+Unidecode
+sqlmodel
