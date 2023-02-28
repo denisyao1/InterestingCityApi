@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     RESSOURCES_FOLDER = "./ressources"
 
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
 
 
 @lru_cache
@@ -18,4 +18,6 @@ def get_settings() -> Settings:
     """
     Return App Settings.
     """
+    print(Settings().INDICATEUR_LOYERS)
+    print(Settings().DATABASE_URL)
     return Settings()

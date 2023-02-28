@@ -3,7 +3,9 @@ from fastapi import FastAPI, Query
 from app import models
 
 tags_data = [{"name": "Départements"}]
-app = FastAPI(title="API Villes Interessantes", version="1.0.0", tags_metadata=tags_data)
+app = FastAPI(
+    title="API Villes Interessantes", version="1.0.0", tags_metadata=tags_data
+)
 
 
 @app.on_event("startup")
@@ -24,7 +26,6 @@ async def recherche_villes_departement(
     """
 
     return models.get_cities(departement=code, loyer_max=loyer_max, surface=surface)
-
 
 
 if __name__ == "__main__":

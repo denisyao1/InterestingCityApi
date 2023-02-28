@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    container_name: api-villes-interressantes
+    # command: uvicorn app.main:app --host 0.0.0.0
+    environment:
+      PORT: 8000
+    ports:
+      - '8000:8000'
+    restart: "no"
