@@ -128,6 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+#IDE file
+.vscode/
+
 # perso file
 errors.txt
 cities.db
