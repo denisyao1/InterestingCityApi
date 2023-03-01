@@ -1,87 +1,48 @@
-import pathlib
+from sqlalchemy import Column, Integer, Float, String
 
-from sqlmodel import Field, Session, SQLModel, create_engine, select
-
-from app import settings
-
-config = settings.get_settings()
+from app.db import Base
 
 
-class Ville(SQLModel):
-    nom: str
-    loyer_moyen: float
-    note: float = Field(default=0)
-    population: int
-    code_postal: str
-    departement: str = Field(index=True)
-    code_insee: str = Field(unique=True)
+class Ville(Base):
+    __tablename__ = "ville"
 
+    nom = Column(String)
+    loyer_moyen = Column(Float)
+    note = Column(Float, default=0)
+    population = Column(Integer)
+    code_postal = Column(String)
+    departement = Column(String, index=True)
+    code_insee = Column(String, primary_key=True)
 
-class CityDB(Ville, table=True):
-    __tablename__ = "cities"
-    id: int | None = Field(default=None, primary_key=True)
+    def __init__(
+        self,
+        nom: str,
+        loyer_moyen: float,
+        note: float,
+        population: int,
+        code_postal: str,
+        departement: str,
+        code_insee: str,
+    ) -> None:
+        super().__init__()
+        self.nom = nom
+        self.loyer_moyen = loyer_moyen
+        self.note = note
+        self.population = population
+        self.code_postal = code_postal
+        self.departement = departement
+        self.code_insee = code_insee
 
-
-class Villes(SQLModel):
-    count: int
-    villes: list[Ville] = []
-
-
-engine = create_engine(config.DATABASE_URL, echo=True)
-
-
-def create_db_and_data():
-    """
-    Create the Database and load data into it.
-    """
-    SQLModel.metadata.create_all(engine)
-    try:
-        create_cities()
-    except:
-        pass
-
-
-def load_results() -> list[dict]:
-    """
-    Load results.csv file into a list of dict.
-    """
-    import csv
-
-    file = pathlib.Path(f"{config.RESSOURCES_FOLDER}/results.csv")
-
-    if not file.exists():
-        raise FileNotFoundError(f"Le fichier {file} n'existe pas")
-
-    with open(file, "r") as csvfile:
-        reader = csv.DictReader(csvfile)
-
-        return [row for row in reader]
-
-
-def create_cities():
-    """
-    Load result files cities and copy them to Database.
-    """
-
-    cities = load_results()
-    cities = [CityDB(**row) for row in cities]
-    with Session(engine) as session:
-        session.add_all(cities)
-        session.commit()
-
-
-def get_cities(departement: str, surface: int, loyer_max: int) -> Villes:
-    """
-    Return cities of the defined department.
-    """
-    with Session(engine) as session:
-        statement = (
-            select(CityDB)
-            .where(CityDB.departement == departement)
-            .where(CityDB.loyer_moyen * surface <= loyer_max)
-            .order_by(CityDB.note.desc())
-            .order_by(CityDB.nom.asc())
-        )
-        results = session.exec(statement).all()
-        results = [Ville(**elm.dict()) for elm in results]
-        return Villes(count=len(results), villes=results)
+    def json(self):
+        """
+        Return a dict of attribute.
+        """
+        return {
+            "nom": self.nom,
+            "loyer_moyen": self.loyer_moyen,
+            "note": self.note,
+            "population": self.population,
+            "code_postal": self.code_postal,
+            "departement": self.departement,
+            "code_insee": self.code_insee,
+        }

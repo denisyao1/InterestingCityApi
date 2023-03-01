@@ -5,3 +5,5 @@ __pycache__
 venv
 cities.db
 errors.txt
+Dockerfile
+compose.yml

@@ -1,6 +1,12 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
-from app import models
+from app import services, models, schemas
+from app.db import SessionLocal, engine
+
+models.Base.metadata.create_all(bind=engine)
+
 
 tags_data = [{"name": "Départements"}]
 app = FastAPI(
@@ -8,24 +14,43 @@ app = FastAPI(
 )
 
 
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
 async def startup():
-    models.create_db_and_data()
+    try:
+        services.create_cities(engine)
+    except IntegrityError:
+        pass
+    except Exception as e:
+        raise
 
 
 @app.get("/departements/{code}/villes", tags=["Départements"])
 async def recherche_villes_departement(
+    db: Session = Depends(get_db),
     code: str = Query(
         ..., description="Le code du departement sur lequel porte la recherche"
     ),
     loyer_max: int = Query(..., description="Le loyer en Euros maximun du logement"),
     surface: int = Query(..., description="La surface du logement en m²"),
-) -> models.Villes:
+) -> schemas.ListeVilles:
     """
     Recherche les villes d'un département par note décroissante.
     """
-
-    return models.get_cities(departement=code, loyer_max=loyer_max, surface=surface)
+    cities = services.get_cities(
+        db, departement=code, loyer_max=loyer_max, surface=surface
+    )
+    return schemas.ListeVilles(
+        nombre=len(cities), villes=[city.json() for city in cities]
+    )
 
 
 if __name__ == "__main__":

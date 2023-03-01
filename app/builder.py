@@ -1,4 +1,5 @@
 import csv
+import json
 import pathlib
 import decimal
 from datetime import datetime
@@ -202,7 +203,6 @@ async def get_cities_informations(filename: str) -> list[dict]:
     """
 
     results = load_indicateur_loyers(filename)
-    len1 = len(results)
     start_date = datetime.now()
     for ville in results:
         try:
@@ -225,30 +225,17 @@ async def get_cities_informations(filename: str) -> list[dict]:
     end_date = datetime.now()
     print(f"--> programme exécuté en {end_date - start_date}")
     results = list(filter(lambda element: element.get("nom") is not None, results))
-    len2 = len(results)
-    print(f"--> len1 : {len1}")
-    print(f"--> len2 : {len2}")
-    print(f"ratio : {len2/len1 * 100}")
     return results
 
 
-def save_into_csv(cities_infos: list[dict]) -> None:
+def save_into_json(cities_infos: list[dict]) -> None:
     """
-    Save cities information to csv file.
+    Save cities information to json file.
     """
-    with open(f"{config.RESSOURCES_FOLDER}/results.csv", "w") as result_file:
-        fieldnames = [
-            "code_insee",
-            "departement",
-            "loyer_moyen",
-            "nom",
-            "code_postal",
-            "population",
-            "note",
-        ]
-        writer = csv.DictWriter(result_file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(cities_infos)
+    with open(
+        f"{config.RESSOURCES_FOLDER}/results.json", "w", encoding="utf-8"
+    ) as json_file:
+        json.dump(cities_infos, json_file, indent=4)
 
 
 async def main():
@@ -256,7 +243,7 @@ async def main():
     Get cities information from file and save them csv file.
     """
     results = await get_cities_informations(config.INDICATEUR_LOYERS)
-    save_into_csv(results)
+    save_into_json(results)
 
 
 if __name__ == "__main__":

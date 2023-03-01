@@ -18,6 +18,4 @@ def get_settings() -> Settings:
     """
     Return App Settings.
     """
-    print(Settings().INDICATEUR_LOYERS)
-    print(Settings().DATABASE_URL)
     return Settings()
